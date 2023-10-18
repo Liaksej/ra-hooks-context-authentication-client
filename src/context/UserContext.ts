@@ -1,12 +1,5 @@
 import { createContext, Dispatch } from "react";
-
-interface State {
-  authorized: boolean;
-}
-
-interface Action {
-  type: "authorized" | "unauthorized";
-}
+import { Action, State } from "@/app/page";
 
 interface UserContextType {
   state: State;
@@ -14,7 +7,7 @@ interface UserContextType {
 }
 
 const UserContext = createContext<UserContextType>({
-  state: { authorized: false },
+  state: { authorized: false, heading: "", cards: [], user: null },
   dispatch: () => {},
 });
 

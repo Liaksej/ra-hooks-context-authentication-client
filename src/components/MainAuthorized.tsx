@@ -1,3 +1,9 @@
+import { CardsList } from "@/components/CardsList";
+
 export const MainAuthorized = () => {
-  return null;
+  return (
+    <div>
+      <CardsList />
+    </div>
+  );
 };
