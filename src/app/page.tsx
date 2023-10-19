@@ -4,6 +4,7 @@ import { Main } from "@/components/Main";
 import { Header } from "@/components/Header";
 import UserContext from "@/context/UserContext";
 import { useLayoutEffect, useReducer } from "react";
+import { fetchFunction } from "@/utils/fetchFunction";
 
 export interface State {
   authorized: boolean;
@@ -19,17 +20,24 @@ export interface State {
   user: {
     id: string;
     login: string;
-    username: string;
+    name: string;
     avatar: string;
   } | null;
 }
 
-export interface Action {
-  type: "authorized" | "unauthorized" | "getUser";
-  payload?: State["user"];
-}
+type ActionAuthorization = {
+  type: "authorized" | "unauthorized";
+};
+
+type ActionGetUser = {
+  type: "getUser";
+  payload: State["user"];
+};
+
+export type Action = ActionAuthorization | ActionGetUser;
 
 const HEADING = "Neto Social";
+const URL = "http://localhost:7070/private/me";
 
 function reducer(state: State, action: Action) {
   switch (action.type) {
@@ -55,18 +63,31 @@ export default function Home() {
     const authorized = localStorage.getItem("authorized");
     if (authorized) {
       dispatch({ type: "authorized" });
+      const user = localStorage.getItem("user");
+      let userData: State["user"] | null | undefined;
+      if (user) {
+        userData = JSON.parse(user);
+        if (userData) {
+          dispatch({ type: "getUser", payload: userData });
+        }
+      } else {
+        (async () => {
+          try {
+            userData = await fetchFunction(URL, "GET", { auth: authorized });
+            if (userData) {
+              dispatch({ type: "getUser", payload: userData });
+              localStorage.setItem("user", JSON.stringify(userData));
+            } else {
+              throw new Error("Failed to fetch user");
+            }
+          } catch (error) {
+            console.error(error);
+            userData = null;
+          }
+        })();
+      }
     }
-
-    if (!authorized) {
-      dispatch({ type: "unauthorized" });
-    }
-
-    const user = localStorage.getItem("user");
-    if (user) {
-      const userData: State["user"] = JSON.parse(user);
-      dispatch({ type: "getUser", payload: userData });
-    }
-  }, [state.authorized, state.user]);
+  }, [dispatch]);
 
   return (
     <>

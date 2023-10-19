@@ -1,5 +1,5 @@
 import { Button } from "@/components/Button";
-import { useContext } from "react";
+import { FormEvent, useContext } from "react";
 import UserContext from "@/context/UserContext";
 import { fetchFunction } from "@/utils/fetchFunction";
 
@@ -10,7 +10,7 @@ const URL_AUTH = "http://localhost:7070/auth";
 export const AuthorizationForm = () => {
   const context = useContext(UserContext);
 
-  const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+  const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
     const usernameInput = form.elements.namedItem(
@@ -19,11 +19,17 @@ export const AuthorizationForm = () => {
     const passwordInput = form.elements.namedItem(
       PLACEHOLDER_PASSWORD,
     ) as HTMLInputElement;
-    const data = await fetchFunction(URL_AUTH, "POST", {
-      username: usernameInput.value,
-      password: passwordInput.value,
-    });
-    if (data.token && localStorage) {
+    const data: { token: string } | undefined = (await fetchFunction(
+      URL_AUTH,
+      "POST",
+      {
+        body: {
+          login: usernameInput.value,
+          password: passwordInput.value,
+        },
+      },
+    )) as { token: string } | undefined;
+    if (data && data.token && localStorage) {
       localStorage.setItem("authorized", data.token);
       context.dispatch({ type: "authorized" });
     }
