@@ -1,5 +1,5 @@
 import { createContext, Dispatch } from "react";
-import { Action, State } from "@/app/page";
+import { Action, State } from "@/hooks/useAuthorizedData";
 
 interface UserContextType {
   state: State;
@@ -7,7 +7,13 @@ interface UserContextType {
 }
 
 const UserContext = createContext<UserContextType>({
-  state: { authorized: false, heading: "", cards: [], user: null },
+  state: {
+    authorized: false,
+    heading: "",
+    cards: [],
+    user: null,
+    isBrowser: false,
+  },
   dispatch: () => {},
 });
 
